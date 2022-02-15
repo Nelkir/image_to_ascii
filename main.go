@@ -20,18 +20,20 @@ import (
 	// _ "image/gif"
 	// _ "image/png"
 
+	"image/jpeg"
 	_ "image/jpeg"
 
 	"github.com/nfnt/resize"
 )
 
 var (
-	path_to_image = flag.String("i", "", "set path image")
-	width         = flag.Int("w", 0, "Set with of resulting image")
-	height        = flag.Int("h", 0, "Set height of resulting image")
-	debug         = flag.Bool("d", false, "Set debug for timings. Write to console. Image still writes direct to stdin")
-	as_char       = flag.Bool("c", false, "Print string as array of chars")
-	negative      = flag.Bool("n", false, "Reverse brighness detection")
+	path_to_image        = flag.String("i", "", "set path image")
+	width                = flag.Int("w", 0, "Set with of resulting image")
+	height               = flag.Int("h", 0, "Set height of resulting image")
+	debug                = flag.Bool("d", false, "Set debug for timings. Write to console. Image still writes direct to stdin")
+	as_char              = flag.Bool("c", false, "Print string as array of chars")
+	negative             = flag.Bool("n", false, "Reverse brighness detection")
+	create_resized_image = flag.String("r", "", "Create resized copy of image")
 )
 
 func main() {
@@ -91,6 +93,14 @@ func main() {
 	}
 	since = time.Since(start)
 	prepare_time := fmt.Sprintf("Prepare screen buff took = %v\n", since)
+
+	if *create_resized_image != "" {
+		resized_image_file, err := os.OpenFile(*create_resized_image, os.O_APPEND|os.O_CREATE|os.O_TRUNC|os.O_RDWR, os.ModePerm)
+		if err != nil {
+			fmt.Printf("Can't create resized image: %s\n", err)
+		}
+		jpeg.Encode(resized_image_file, resized_image, nil)
+	}
 
 	start = time.Now()
 	for i := 0; i < resized_bounds.Max.Y; i++ {
